@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amazon Inventory Optimization Dashboard H1 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── AMAZON CORPORATE TOKENS ─────────────────────── */
+:root{
+  --squid:#232F3E;        /* Amazon Squid Ink */
+  --squid-lt:#2D3B4E;
+  --squid-dk:#141E2B;
+  --orange:#FF9900;       /* Amazon Smile */
+  --orange-dk:#E88B00;
+  --orange-xl:#FFF3CD;
+  --aws:#1A73E8;          /* AWS Blue */
+  --teal:#00A8B5;
+  --white:#FFFFFF;
+  --off:#F8F9FA;
+  --lt:#F0F2F5;
+  --mid:#D1D5DB;
+  --dim:#6B7280;
+  --red:#D13212;          /* Amazon Risk Red */
+  --red-lt:#FDECEA;
+  --amber:#D9822B;
+  --amber-lt:#FEF3E2;
+  --green:#067D62;
+  --green-lt:#E6F4F1;
+  --text:#1E293B;
+  --text-2:#4A5568;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--squid-dk);color:var(--off);font-family:'Segoe UI',Calibri,system-ui,sans-serif;font-size:13px;line-height:1.5}
+
+/* ── TOPBAR ──────────────────────────────────────── */
+.topbar{background:var(--squid);border-bottom:3px solid var(--orange);padding:0 28px;
+        display:flex;align-items:stretch;justify-content:space-between;min-height:52px}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.amazon-logo{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.amazon-logo span{color:var(--orange)}
+.topbar-divider{width:1px;height:28px;background:rgba(255,255,255,0.15)}
+.topbar-title{font-size:13px;color:rgba(255,255,255,0.75);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:20px}
+.topbar-meta{font-size:11px;color:rgba(255,255,255,0.5);text-align:right;line-height:1.6}
+.topbar-meta strong{color:rgba(255,255,255,0.85)}
+.status-badge{background:var(--orange);color:var(--squid);font-size:9px;font-weight:800;
+              padding:3px 9px;border-radius:3px;text-transform:uppercase;letter-spacing:0.8px}
+
+/* ── SUBBAR ──────────────────────────────────────── */
+.subbar{background:var(--squid-lt);border-bottom:1px solid rgba(255,255,255,0.07);
+        padding:7px 28px;display:flex;align-items:center;gap:24px}
+.subbar-item{font-size:11px;color:rgba(255,255,255,0.5)}
+.subbar-item strong{color:rgba(255,255,255,0.8)}
+.subbar-sep{color:rgba(255,255,255,0.15)}
+
+/* ── LAYOUT ──────────────────────────────────────── */
+.page{padding:18px 28px 28px}
+.section-hdr{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
+.section-hdr h2{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;
+                letter-spacing:1.2px;white-space:nowrap}
+.section-hdr::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07)}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-21{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.grid-12{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+
+/* ── KPI CARDS ──────────────────────────────────── */
+.kpi{background:var(--squid);border:1px solid rgba(255,255,255,0.08);border-radius:6px;
+     padding:16px 18px;position:relative;overflow:hidden}
+.kpi-stripe{position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-label{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;
+           letter-spacing:0.9px;margin-bottom:6px}
+.kpi-value{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.kpi-sub{font-size:11px;color:var(--dim);margin-top:5px}
+.kpi-orange .kpi-stripe{background:var(--orange)} .kpi-orange .kpi-value{color:var(--orange)}
+.kpi-green .kpi-stripe{background:var(--green)}   .kpi-green .kpi-value{color:#10B981}
+.kpi-aws .kpi-stripe{background:var(--aws)}       .kpi-aws .kpi-value{color:#60A5FA}
+.kpi-red .kpi-stripe{background:var(--red)}       .kpi-red .kpi-value{color:#F87171}
+
+/* ── INSIGHT CARDS ──────────────────────────────── */
+.insight{background:var(--squid);border:1px solid rgba(255,255,255,0.08);border-radius:6px;overflow:hidden}
+.insight-hdr{padding:12px 15px 10px;display:flex;align-items:flex-start;gap:10px}
+.insight-num{font-size:9px;font-weight:800;min-width:22px;height:22px;border-radius:3px;
+             display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0}
+.insight-title{font-size:12px;font-weight:700;color:var(--white);line-height:1.3}
+.insight-body{padding:0 15px 14px 47px;font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.75}
+.insight-body strong{color:rgba(255,255,255,0.85)}
+.ins-red{border-left:3px solid var(--red)}
+.ins-red .insight-num{background:rgba(209,50,18,0.2);color:var(--red)}
+.ins-amber{border-left:3px solid var(--amber)}
+.ins-amber .insight-num{background:rgba(217,130,43,0.2);color:var(--amber)}
+.ins-aws{border-left:3px solid var(--aws)}
+.ins-aws .insight-num{background:rgba(26,115,232,0.2);color:var(--aws)}
+
+/* ── CHART CARDS ─────────────────────────────────── */
+.card{background:var(--squid);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:16px 18px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;
+            letter-spacing:0.8px;display:flex;align-items:center;gap:7px}
+.card-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.card-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px}
+.badge-red{background:rgba(209,50,18,.15);color:#F87171;border:1px solid rgba(209,50,18,.25)}
+.badge-amber{background:rgba(217,130,43,.15);color:#FCD34D;border:1px solid rgba(217,130,43,.25)}
+.badge-green{background:rgba(6,125,98,.15);color:#6EE7B7;border:1px solid rgba(6,125,98,.25)}
+.badge-aws{background:rgba(26,115,232,.15);color:#93C5FD;border:1px solid rgba(26,115,232,.25)}
+.chart-wrap{position:relative}
+.h200{height:200px} .h230{height:230px} .h260{height:260px} .h280{height:280px}
+
+/* ── HEATMAP ─────────────────────────────────────── */
+.hm-grid{display:grid;gap:3px}
+.hm-row{display:grid;grid-template-columns:108px repeat(6,1fr);gap:3px;align-items:center}
+.hm-lbl{font-size:10px;color:var(--dim);text-align:right;padding-right:8px}
+.hm-cell{height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+         font-size:11px;font-weight:700;color:rgba(255,255,255,0.9)}
+.hm-col-hdr{font-size:10px;color:var(--dim);text-align:center;padding:3px 0}
+.hm-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.hm-legend-item{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--dim)}
+.hm-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0}
+
+/* ── TABLE ───────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{background:var(--squid-lt);color:var(--dim);font-size:9.5px;text-transform:uppercase;
+   letter-spacing:.7px;padding:9px 11px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);
+   white-space:nowrap;font-weight:700}
+td{padding:9px 11px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.78)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.03)}
+.td-bold{font-weight:700;color:var(--white)}
+.td-red{color:#F87171;font-weight:700}
+.td-amber{color:#FCD34D;font-weight:700}
+.td-green{color:#6EE7B7;font-weight:700}
+.td-aws{color:#93C5FD;font-weight:700}
+.pill{display:inline-block;padding:2px 8px;border-radius:3px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.pill-crit{background:rgba(209,50,18,.18);color:#F87171;border:1px solid rgba(209,50,18,.3)}
+.pill-high{background:rgba(217,130,43,.18);color:#FCD34D;border:1px solid rgba(217,130,43,.3)}
+.pill-med{background:rgba(26,115,232,.18);color:#93C5FD;border:1px solid rgba(26,115,232,.3)}
+.pill-low{background:rgba(6,125,98,.18);color:#6EE7B7;border:1px solid rgba(6,125,98,.3)}
+
+/* ── MINI BARS ────────────────────────────────────── */
+.bar-set{display:grid;gap:9px}
+.bar-row{display:grid;grid-template-columns:115px 1fr 52px;align-items:center;gap:9px}
+.bar-lbl{font-size:11px;color:var(--dim);text-align:right}
+.bar-track{background:rgba(255,255,255,0.07);border-radius:2px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px}
+.bar-val{font-size:11px;font-weight:700;color:var(--white);text-align:right}
+
+/* ── FOOTER ──────────────────────────────────────── */
+.footer{background:var(--squid);border-top:1px solid rgba(255,255,255,0.07);
+        padding:11px 28px;display:flex;justify-content:space-between;align-items:center;
+        font-size:10.5px;color:var(--dim)}
+.footer-disc{max-width:680px;line-height:1.5}
+.footer-disc strong{color:rgba(255,255,255,0.6)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="amazon-logo">amazon<span>.</span></div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-title">Inventory Optimization &amp; Risk Mitigation Dashboard — H1 2026</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-meta">
+      <strong>Rahima Akter Diti</strong> · Lead Supply Chain Data Analyst<br>
+      Source: Amazon_Global_Brand_Report_2026H1_Detailed_Reconciled
+    </div>
+    <span class="status-badge">Modeled Data</span>
+  </div>
+</div>
+
+<!-- SUBBAR -->
+<div class="subbar">
+  <div class="subbar-item"><strong>$378,000mm</strong> H1 Revenue</div>
+  <span class="subbar-sep">|</span>
+  <div class="subbar-item"><strong>1,848</strong> Operational Rows</div>
+  <span class="subbar-sep">|</span>
+  <div class="subbar-item"><strong>5</strong> Regions</div>
+  <span class="subbar-sep">|</span>
+  <div class="subbar-item"><strong>6</strong> Categories</div>
+  <span class="subbar-sep">|</span>
+  <div class="subbar-item"><strong>84</strong> Branches</div>
+  <span class="subbar-sep">|</span>
+  <div class="subbar-item">Period: <strong>Jan–Jun 2026</strong></div>
+</div>
+
+<div class="page">
+
+  <!-- KPI ROW -->
+  <div class="section-hdr"><h2>Key Performance Indicators</h2></div>
+  <div class="grid-4">
+    <div class="kpi kpi-orange">
+      <div class="kpi-stripe"></div>
+      <div class="kpi-label">Total H1 Revenue</div>
+      <div class="kpi-value">$378,000mm</div>
+      <div class="kpi-sub">All regions · 6 categories · 12-month basis</div>
+    </div>
+    <div class="kpi kpi-green">
+      <div class="kpi-stripe"></div>
+      <div class="kpi-label">Contribution Margin</div>
+      <div class="kpi-value">25.54%</div>
+      <div class="kpi-sub">AWS leads 37% · Online Stores lowest 11%</div>
+    </div>
+    <div class="kpi kpi-aws">
+      <div class="kpi-stripe"></div>
+      <div class="kpi-label">Avg Days of Inventory on Hand</div>
+      <div class="kpi-value">6.78 Days</div>
+      <div class="kpi-sub">4.8 d floor · 7.0 d target · 60% Watch status</div>
+    </div>
+    <div class="kpi kpi-red">
+      <div class="kpi-stripe"></div>
+      <div class="kpi-label">Overstock Capital Tied Up</div>
+      <div class="kpi-value">$4,469mm</div>
+      <div class="kpi-sub">NA $2,888mm (64.6%) · EU $849mm · APAC $480mm</div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="section-hdr"><h2>3 Core Inventory Risk Insights</h2></div>
+  <div class="grid-3">
+    <div class="insight ins-red">
+      <div class="insight-hdr">
+        <div class="insight-num">01</div>
+        <div class="insight-title">Stockout Risk — 60% of Rows on Watch</div>
+      </div>
+      <div class="insight-body">
+        <strong>1,109 of 1,848 rows (60.0%)</strong> carry Watch status. <strong>61 rows</strong> breach the 5-day Stock Cover floor. APAC Watch nodes average <strong>6.13 DOIH</strong> — 0.87 days below target. Online Stores (146 rows) and 3P Seller Services (203 rows) carry the highest stockout exposure. Revenue gap: <strong>–$11,154mm</strong> globally.
+      </div>
+    </div>
+    <div class="insight ins-amber">
+      <div class="insight-hdr">
+        <div class="insight-num">02</div>
+        <div class="insight-title">Overstock Capital — $4,469mm Immobilised</div>
+      </div>
+      <div class="insight-body">
+        <strong>$4,469mm</strong> tied in above-target inventory (avg $42/unit). North America drives <strong>64.6% ($2,888mm)</strong>. 3P Seller Services ($2,270mm) + Online Stores ($1,426mm) = <strong>82.7%</strong> of total. Apr-2026: 370,738K units vs. 391,012K target (–5.2%) — distribution failure, not volume problem.
+      </div>
+    </div>
+    <div class="insight ins-aws">
+      <div class="insight-hdr">
+        <div class="insight-num">03</div>
+        <div class="insight-title">Fulfillment Bottlenecks — APAC/EMEA Excess Dwell</div>
+      </div>
+      <div class="insight-body">
+        APAC Hub AWS Enterprise: <strong>1.626-day dwell</strong> vs. 0.83 d benchmark (96% excess). Americas HQ Advertising Platform: lowest OTD at <strong>95.7%</strong>. Europe: widest revenue gap <strong>–$2,062mm</strong> with $849mm concurrent overstock. NA fulfillment cost: <strong>$14,791mm</strong> vs. MEA $498mm (29.7×).
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTORY vs TARGET + GAP -->
+  <div class="section-hdr"><h2>Inventory vs Target Stock Level</h2></div>
+  <div class="grid-21">
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--aws)"></span>Closing Stock vs 7-Day Target (000 units) — Monthly</div>
+        <span class="card-badge badge-amber">All Months Below Target</span>
+      </div>
+      <div class="chart-wrap h230"><canvas id="invChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--red)"></span>Stock Gap vs Target (000 units)</div>
+      </div>
+      <div class="chart-wrap h230"><canvas id="gapChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- DOIH HEATMAP -->
+  <div class="section-hdr"><h2>Days of Inventory on Hand (DOIH) — Regional Heatmap</h2></div>
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title"><span class="card-dot" style="background:var(--orange)"></span>DOIH by Region × Month — Target: 7.0 Days · Watch Threshold: 5.0 Days</div>
+      <span class="card-badge badge-amber">1,109 Watch Rows · 61 Critical</span>
+    </div>
+    <div class="hm-grid">
+      <div class="hm-row">
+        <div></div>
+        <div class="hm-col-hdr">Jan-26</div><div class="hm-col-hdr">Feb-26</div>
+        <div class="hm-col-hdr">Mar-26</div><div class="hm-col-hdr">Apr-26</div>
+        <div class="hm-col-hdr">May-26</div><div class="hm-col-hdr">Jun-26</div>
+      </div>
+      <div id="hmContainer"></div>
+    </div>
+    <div class="hm-legend">
+      <div class="hm-legend-item"><div class="hm-swatch" style="background:#067D62"></div>≥ 7.0 d — On Target</div>
+      <div class="hm-legend-item"><div class="hm-swatch" style="background:#1A73E8"></div>6.5–7.0 d — Near Target</div>
+      <div class="hm-legend-item"><div class="hm-swatch" style="background:#D9822B"></div>5.5–6.5 d — Watch</div>
+      <div class="hm-legend-item"><div class="hm-swatch" style="background:#D13212"></div>&lt; 5.5 d — Critical Risk</div>
+    </div>
+  </div>
+
+  <!-- RISK EXPOSURE BY FC -->
+  <div class="section-hdr"><h2>Risk Exposure Trends by Fulfillment Center</h2></div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--red)"></span>On-Time Delivery Rate by Branch</div>
+        <span class="card-badge badge-red">Floor: 95.7%</span>
+      </div>
+      <div class="chart-wrap h200"><canvas id="otdChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--orange)"></span>Overstock Capital by Category ($mm)</div>
+        <span class="card-badge badge-amber">$4,469mm Total</span>
+      </div>
+      <div class="chart-wrap h200"><canvas id="overstockChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--amber)"></span>Avg Fulfillment Days — High Dwell FCs</div>
+        <span class="card-badge badge-red">Target: &lt; 1.0 d</span>
+      </div>
+      <div class="chart-wrap h200"><canvas id="dwellChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- REGIONAL SUMMARY + REVENUE GAP -->
+  <div class="section-hdr"><h2>Regional Risk Summary</h2></div>
+  <div class="grid-12">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title"><span class="card-dot" style="background:var(--teal)"></span>Fill Rate by Region</div></div>
+      <div class="bar-set" style="margin-top:8px">
+        <div class="bar-row"><span class="bar-lbl">Asia Pacific</span><div class="bar-track"><div class="bar-fill" style="width:97.11%;background:var(--teal)"></div></div><span class="bar-val">97.11%</span></div>
+        <div class="bar-row"><span class="bar-lbl">Europe</span><div class="bar-track"><div class="bar-fill" style="width:97.10%;background:var(--teal)"></div></div><span class="bar-val">97.10%</span></div>
+        <div class="bar-row"><span class="bar-lbl">Latin America</span><div class="bar-track"><div class="bar-fill" style="width:97.10%;background:var(--teal)"></div></div><span class="bar-val">97.10%</span></div>
+        <div class="bar-row"><span class="bar-lbl">Mid East/Africa</span><div class="bar-track"><div class="bar-fill" style="width:97.09%;background:var(--amber)"></div></div><span class="bar-val">97.09%</span></div>
+        <div class="bar-row"><span class="bar-lbl">North America</span><div class="bar-track"><div class="bar-fill" style="width:97.08%;background:var(--amber)"></div></div><span class="bar-val">97.08%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="card-dot" style="background:var(--red)"></span>Revenue Gap vs Plan by Region ($mm)</div>
+        <span class="card-badge badge-red">Total Gap: –$11,154mm</span>
+      </div>
+      <div class="chart-wrap h200"><canvas id="revGapChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- FC RISK TABLE -->
+  <div class="section-hdr"><h2>Fulfillment Center Risk Register</h2></div>
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title"><span class="card-dot" style="background:#F87171"></span>Top Risk Branches — Ranked by OTD, Dwell Time &amp; Watch Status</div>
+      <span class="card-badge badge-red">3 CRITICAL · 3 HIGH · 4 MEDIUM</span>
+    </div>
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Branch / Fulfillment Center</th>
+        <th>OTD Rate</th><th>Fulfill Days</th><th>Fill Rate</th>
+        <th>Watch Rows</th><th>Risk Level</th><th>Overstock $mm</th><th>Data Source</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="td-bold">Americas HQ – Advertising Platform</td><td class="td-red">95.7%</td><td>0.560</td><td>96.3%</td><td class="td-amber">23</td><td><span class="pill pill-crit">Critical</span></td><td>$75.0</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">EMEA Hub – Physical Retail</td><td class="td-red">96.1%</td><td>0.540</td><td>97.1%</td><td class="td-amber">19</td><td><span class="pill pill-crit">Critical</span></td><td>$88.4</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">MEA Hub – Physical Retail</td><td class="td-red">96.1%</td><td>0.550</td><td>97.1%</td><td class="td-amber">21</td><td><span class="pill pill-crit">Critical</span></td><td>$22.1</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">EMEA Hub – AWS Enterprise</td><td>96.4%</td><td class="td-amber">1.600</td><td>97.1%</td><td class="td-amber">27</td><td><span class="pill pill-high">High</span></td><td>$186.1</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">APAC Hub – Advertising Platform</td><td>96.3%</td><td>0.540</td><td>97.1%</td><td class="td-amber">28</td><td><span class="pill pill-high">High</span></td><td>$52.4</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">APAC Hub – AWS Enterprise</td><td>96.6%</td><td class="td-red">1.626</td><td>97.1%</td><td class="td-amber">31</td><td><span class="pill pill-med">Medium</span></td><td>$62.7</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">Americas HQ – Marketplace Sellers</td><td>96.6%</td><td class="td-amber">1.590</td><td>96.3%</td><td>14</td><td><span class="pill pill-med">Medium</span></td><td class="td-amber">$412.3</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+        <tr><td class="td-bold">Americas HQ – Amazon.com / App</td><td>96.6%</td><td>1.350</td><td>95.9%</td><td>16</td><td><span class="pill pill-med">Medium</span></td><td class="td-red">$924.5</td><td style="color:var(--dim);font-size:10.5px">Amazon Q1 2026 + modeled</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-disc">
+    ⚠ <strong>DISCLAIMER:</strong> This analysis is for demonstration purposes based on modeled data. Internal Amazon disclosures may differ. &nbsp;·&nbsp;
+    Sources: Amazon Q1 FY2026 IR Results, Amazon 2025 Annual Report, Interbrand Best Global Brands 2025, Modeled Allocation.
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.5);text-align:right;white-space:nowrap">
+    Prepared by: <strong style="color:rgba(255,255,255,0.8)">Rahima Akter Diti</strong><br>
+    Lead Supply Chain Data Analyst
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#6B7280';
+Chart.defaults.font.family="'Segoe UI',Calibri,system-ui,sans-serif";
+Chart.defaults.font.size=11;
+const gc='rgba(255,255,255,0.05)';
+const tip={backgroundColor:'#2D3B4E',borderColor:'rgba(255,255,255,0.12)',borderWidth:1,
+           titleColor:'#E2E8F0',bodyColor:'#9CA3AF',padding:10,cornerRadius:4};
+
+// ── HEATMAP ──────────────────────────────────────
+const hmData={
+  regions:['North America','Europe','Asia Pacific','Latin America','MEA'],
+  values:[
+    [6.78,6.77,6.79,6.76,6.78,6.78],
+    [6.78,6.77,6.79,6.77,6.78,6.78],
+    [6.79,6.78,6.80,6.77,6.78,6.78],
+    [6.78,6.77,6.79,6.76,6.78,6.78],
+    [6.78,6.77,6.79,6.77,6.78,6.78],
+  ]
+};
+function hmColor(v){
+  if(v>=7.0) return '#067D62';
+  if(v>=6.5) return '#1A73E8';
+  if(v>=5.5) return '#D9822B';
+  return '#D13212';
+}
+const cont=document.getElementById('hmContainer');
+hmData.regions.forEach((reg,ri)=>{
+  const row=document.createElement('div');
+  row.className='hm-row';
+  const lbl=document.createElement('div');
+  lbl.className='hm-lbl';lbl.textContent=reg;row.appendChild(lbl);
+  hmData.values[ri].forEach(v=>{
+    const cell=document.createElement('div');
+    cell.className='hm-cell';
+    cell.style.background=hmColor(v);
+    cell.textContent=v.toFixed(2);
+    row.appendChild(cell);
+  });
+  cont.appendChild(row);
+});
+
+// ── INV vs TARGET ────────────────────────────────
+new Chart(document.getElementById('invChart'),{
+  type:'bar',
+  data:{
+    labels:['Jan','Feb','Mar','Apr','May','Jun'],
+    datasets:[
+      {label:'Closing Stock (000)',
+       data:[354810,334531,385233,370738,418055,438160],
+       backgroundColor:'rgba(26,115,232,0.45)',borderColor:'#1A73E8',borderWidth:1.5,borderRadius:3,order:2},
+      {label:'7-Day Target (000)',
+       data:[368309,346374,388550,391012,426234,446712],
+       type:'line',borderColor:'#FF9900',backgroundColor:'transparent',
+       borderWidth:2,borderDash:[5,3],pointRadius:4,pointBackgroundColor:'#FF9900',order:1}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#9CA3AF',boxWidth:12,padding:14}},tooltip:tip},
+    scales:{
+      x:{ticks:{color:'#6B7280'},grid:{color:gc}},
+      y:{ticks:{color:'#6B7280',callback:v=>(v/1000).toFixed(0)+'K'},grid:{color:gc}}
+    }
+  }
+});
+
+// ── GAP CHART ────────────────────────────────────
+new Chart(document.getElementById('gapChart'),{
+  type:'bar',
+  data:{
+    labels:['Jan','Feb','Mar','Apr','May','Jun'],
+    datasets:[{
+      label:'Gap vs Target (000)',
+      data:[-13499,-11843,-3317,-20274,-8179,-8552],
+      backgroundColor:v=>v.raw>=0?'rgba(6,125,98,.55)':'rgba(209,50,18,.55)',
+      borderColor:v=>v.raw>=0?'#067D62':'#D13212',
+      borderWidth:1.5,borderRadius:3
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...tip,
+      callbacks:{label:ctx=>`Gap: ${ctx.raw.toLocaleString()} units`}}},
+    scales:{
+      x:{ticks:{color:'#6B7280'},grid:{color:gc}},
+      y:{ticks:{color:'#6B7280',callback:v=>(v/1000).toFixed(0)+'K'},grid:{color:gc}}
+    }
+  }
+});
+
+// ── OTD CHART ─────────────────────────────────────
+new Chart(document.getElementById('otdChart'),{
+  type:'bar',
+  data:{
+    labels:['AmHQ Adv','EMEA Phys','MEA Phys','APAC Adv','LATAM Adv','EMEA AWS'],
+    datasets:[{
+      label:'OTD Rate',
+      data:[0.957,0.961,0.961,0.963,0.963,0.964],
+      backgroundColor:['rgba(209,50,18,.6)','rgba(209,50,18,.55)','rgba(209,50,18,.5)',
+                       'rgba(217,130,43,.55)','rgba(217,130,43,.5)','rgba(217,130,43,.5)'],
+      borderColor:['#D13212','#D13212','#D13212','#D9822B','#D9822B','#D9822B'],
+      borderWidth:1.5,borderRadius:3
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{...tip,
+      callbacks:{label:ctx=>`OTD: ${(ctx.raw*100).toFixed(1)}%`}}},
+    scales:{
+      x:{ticks:{color:'#6B7280',callback:v=>(v*100).toFixed(1)+'%'},grid:{color:gc},min:0.95,max:0.968},
+      y:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:gc}}
+    }
+  }
+});
+
+// ── OVERSTOCK DONUT ───────────────────────────────
+new Chart(document.getElementById('overstockChart'),{
+  type:'doughnut',
+  data:{
+    labels:['3P Seller Services','Online Stores','Subscription','Physical Stores','Advertising','AWS'],
+    datasets:[{
+      data:[2270.4,1426.3,606.5,88.4,75.0,2.6],
+      backgroundColor:['rgba(209,50,18,.75)','rgba(255,153,0,.7)','rgba(217,130,43,.7)',
+                       'rgba(0,168,181,.6)','rgba(26,115,232,.6)','rgba(6,125,98,.6)'],
+      borderColor:'#141E2B',borderWidth:2
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'right',labels:{color:'#9CA3AF',font:{size:9},padding:6,boxWidth:10}},
+      tooltip:{...tip,callbacks:{label:ctx=>`$${ctx.raw.toLocaleString()}mm (${ctx.label})`}}
+    }
+  }
+});
+
+// ── DWELL CHART ───────────────────────────────────
+new Chart(document.getElementById('dwellChart'),{
+  type:'bar',
+  data:{
+    labels:['APAC AWS','MEA AWS','APAC Mkt','MEA Mkt','EMEA AWS','EMEA Mkt'],
+    datasets:[{
+      label:'Avg Fulfillment Days',
+      data:[1.626,1.614,1.610,1.607,1.600,1.593],
+      backgroundColor:['rgba(209,50,18,.65)','rgba(209,50,18,.6)','rgba(217,130,43,.6)',
+                       'rgba(217,130,43,.55)','rgba(209,50,18,.6)','rgba(217,130,43,.5)'],
+      borderColor:['#D13212','#D13212','#D9822B','#D9822B','#D13212','#D9822B'],
+      borderWidth:1.5,borderRadius:3
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...tip,
+      callbacks:{label:ctx=>`${ctx.raw.toFixed(3)} days`}}},
+    scales:{
+      x:{ticks:{color:'#6B7280',font:{size:9.5}},grid:{color:gc}},
+      y:{ticks:{color:'#6B7280'},grid:{color:gc},min:1.55,max:1.65}
+    }
+  }
+});
+
+// ── REVENUE GAP ───────────────────────────────────
+new Chart(document.getElementById('revGapChart'),{
+  type:'bar',
+  data:{
+    labels:['North America','Europe','Asia Pacific','Latin America','MEA'],
+    datasets:[{
+      label:'Revenue Gap vs Plan ($mm)',
+      data:[-7229.9,-2062.3,-1228.9,-388.5,-244.2],
+      backgroundColor:'rgba(209,50,18,.55)',borderColor:'#D13212',borderWidth:1.5,borderRadius:3
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{...tip,
+      callbacks:{label:ctx=>`Gap: $${ctx.raw.toLocaleString()}mm`}}},
+    scales:{
+      x:{ticks:{color:'#6B7280'},grid:{color:gc}},
+      y:{ticks:{color:'#6B7280'},grid:{color:gc}}
+    }
+  }
+});
+</script>
+</body>
+</html>
